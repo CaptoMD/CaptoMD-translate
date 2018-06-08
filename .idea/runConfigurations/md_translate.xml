@@ -1,0 +1,5 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="md-translate" type="NodeJSConfigurationType" factoryName="Node.js" application-parameters="--translations 1QFzVCD-NWpIlUpLd0I8_ClXCtqAVTAii2LPbxnYuePo --values 160CFN77g3FjIbCXXHnmgbPD_-HNQo8Cpt2wfl3ikKSA --concepts $PROJECT_DIR$/../CaptoMD-assets/src/concepts --target $PROJECT_DIR$/../CaptoMD-assets/src/app/assets" path-to-js-file="bin/md-translate.js" working-dir="$PROJECT_DIR$">
+    <method />
+  </configuration>
+</component>

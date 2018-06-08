@@ -1,0 +1,39 @@
+{
+  "name": "captomd-translate",
+  "description": "translation utils for CaptoMD",
+  "version": "1.0.0",
+  "private": true,
+  "main": "index.js",
+  "author": "Julien Marcil",
+  "engines": {
+    "node": ">=9.0"
+  },
+  "bin": {
+    "md-translate" : "./bin/md-translate.js"
+  },
+  "dependencies": {
+    "chalk": "2.4.1",
+    "google-spreadsheet": "2.0.4",
+    "js-yaml": "^3.11.0",
+    "lodash": "4.17.10",
+    "minimist": "1.2.0"
+  },
+  "pre-commit": [
+    "eslint"
+  ],
+  "devDependencies": {
+    "eslint": "^4.19.1",
+    "eslint-plugin-import": "^2.12.0",
+    "eslint-plugin-node": "^6.0.1",
+    "eslint-plugin-prettier": "^2.6.0",
+    "pre-commit": "^1.2.2",
+    "prettier": "1.13.4"
+  },
+  "scripts": {
+    "eslint": "eslint --cache ."
+  },
+  "prettier": {
+    "singleQuote": true,
+    "printWidth": 120
+  }
+}

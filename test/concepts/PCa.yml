@@ -1,0 +1,930 @@
+---
+
+# #################################################################################################################### #
+# Prostate Cancer
+# #################################################################################################################### #
+PCa-Root:
+  type: root
+  medicalHistory: PCa-Medical-History
+  currentIllness: PCa-HMA
+  diagnosis: PCa-Diagnosis
+  plan: PCa-Plan
+  paraClinical: PCa-Para-Medical
+  rx: PCa-Rx
+  columns: [PCa-Medical-History, PCa-HMA, PCa-Result, PCa-Para-Medical]
+  drawers: [Rx, Allergy, PCa-Treatments]
+
+# #################################################################################################################### #
+
+PCa-Medical-History:
+  type: column
+  components:
+  - Medical-History-General
+  - Medical-History-Urology-PCa
+  - Medical-History-Cancer
+  - Medical-History-Chx
+  - Medical-History-Family
+  - Medical-History-Other-Diseases
+  - Medical-History-Life-Habits
+
+PCa-HMA:
+  type: column
+  components:
+  - HMA-PCa-Dx
+  - HMA-PCa-Tx
+  - HMA-Advanced-PCa
+  - HMA-PCa-Symptoms
+  - HMA-Physical-Exam
+
+PCa-Result:
+  type: column
+  columns:
+  - PCa-Diagnosis
+  - PCa-Plan
+
+PCa-Diagnosis:
+  type: column
+  components:
+  - PCa-Diagnosis-Details
+
+PCa-Plan:
+  type: column
+  components:
+  - PCa-Plan-Requests
+  - Plan-Notes
+
+
+PCa-Para-Medical:
+  type: column
+  components:
+  - PCa-Laboratory
+  - PCa-Imaging
+
+# #################################################################################################################### #
+
+PCa-Diagnosis-Details:
+  type: Block
+  components: Dx-PCa
+
+PCa-Plan-Requests:
+  type: Block
+  components:
+  - PCa-Follow-Up-Moment
+  - PCa-Plan-Exam-Requests
+  - PCa-Plan-Medical-Consultation-Requests
+  - PCa-Plan-Requests-Notes
+
+PCa-Laboratory:
+  type: Block
+  components:
+  - Laboratory-PSA
+  - Laboratory-Hemoglobin
+  - Laboratory-Creatinine
+  - Laboratory-Calcium-Total
+  - Laboratory-Calcium-Ionized
+  - Laboratory-Testo
+  - Laboratory-Alk-Phos
+  - Laboratory-Urine-Analysis
+  - Laboratory-Urine-Culture
+
+PCa-Imaging:
+  type: Block
+  components:
+  - Imaging-Scintigraphy
+  - Imaging-TDM
+  - Imaging-TEP-Scan
+  - Imaging-MRI
+  - Imaging-Rx
+
+PCa-Rx:
+  type: block
+  components: Rx
+
+PCa-Treatments:
+  type: Category
+  concepts:
+  - PCa-Biopsy
+  - PCa-Radical-Prostatectomy
+  - PCa-Tx-Radiotherapy
+  - HMA-Advanced-PCa-ADT-Recue-Event
+  - HMA-Advanced-PCa-Chimio-Recue-Event
+  - HMA-Advanced-PCa-ADT-2nd-Recue-Event
+  - PCa-Palliative-Radiotherapy-Event
+
+# #################################################################################################################### #
+# Plan PCa                                                                                                             #
+# #################################################################################################################### #
+
+PCa-Follow-Up:
+  type: Block
+  components:
+  - PCa-Follow-Up-Moment
+
+PCa-Follow-Up-Moment:
+  type: Exclusive-Choice
+  control: Buttons
+  value-set: Follow-Up-Moment
+
+PCa-Plan-Exam-Requests:
+  type: Today-Event
+  data:
+  - PCa-Plan-Exam-Requests-Selector
+
+PCa-Plan-Exam-Requests-Selector:
+  type: Data-Type-Selector
+  label: none
+  multiple: true
+  values:
+  - Request-TDM
+  - Request-TEP
+  - Request-Rx
+  - Request-MRI
+  - Request-Scintigraphy
+  - Request-Laboratory
+
+PCa-Plan-Medical-Consultation-Requests:
+  type: Today-Event
+  data:
+  - PCa-Plan-Medical-Consultation-Requests-Selector
+
+PCa-Plan-Medical-Consultation-Requests-Selector:
+  type: Data-Type-Selector
+  label: none
+  multiple: true
+  values:
+  - Request-Medical-Consultation
+
+PCa-Plan-Requests-Notes:
+  type: text
+  control: "textarea"
+  label: false
+  attributes:
+    rows: 20
+
+Plan-Notes:
+  type: text
+  label: false
+  control: "textarea"
+  attributes:
+    rows: 20
+
+# #################################################################################################################### #
+# Current                                                                                                              #
+# #################################################################################################################### #
+HMA-PCa-Dx:
+  type: Block
+  display: inline
+  components:
+  - HMA-PCa-Initial-Dx
+  - HMA-PCa-Dx-Procedures
+
+HMA-PCa-Dx-Procedures:
+  type: block
+  components:
+  - PCa-Biopsy
+
+HMA-PCa-Initial-Dx:
+  type: Event
+  no-enabled: false
+  data: HMA-PCa-Initial-Dx-PSA-Before
+
+HMA-PCa-Initial-Dx-PSA-Before:
+  enable-condition:
+    concept: HMA-PCa-Initial-Dx
+    value: is-date
+  type: Observation-Value
+  path: Laboratory-PSA
+  constraints:
+    Laboratory-PSA:
+      type: before
+      concept: HMA-PCa-Initial-Dx
+
+PCa-Biopsy:
+  type: Event
+  multiple: true
+  no-enabled: false
+  data:
+  - PCa-Biopsy-Pathology-Report
+  - PCa-Biopsy-Gleason
+  - PCa-Biopsy-Pathology-Report-Sample
+  - PCa-Biopsy-Pathology-Report-Tumor-Percentage
+
+PCa-Biopsy-Gleason:
+  type: Aggregate
+  display: "inline"
+  spacing: "compact"
+  concepts:
+  - PCa-Biopsy-Gleason-1
+  - PCa-Biopsy-Gleason-2
+  - PCa-Biopsy-Gleason-3
+  - PCa-Biopsy-Gleason-Value
+
+PCa-Biopsy-Gleason-1:
+  type: Integer
+  unsigned: true
+  max: 5
+
+PCa-Biopsy-Gleason-2:
+  type: Integer
+  unsigned: true
+  max: 5
+
+PCa-Biopsy-Gleason-3:
+  type: Integer
+  unsigned: true
+  max: 5
+
+PCa-Biopsy-Gleason-Value:
+  type: Integer
+  unsigned: true
+  max: 10
+
+PCa-Biopsy-Pathology-Report-Post-Neoadjuvant-Tx:
+  type: Boolean
+  label: implicit
+  no-enabled: false
+
+PCa-Biopsy-Pathology-Report:
+  type: Aggregate
+  display: "inline"
+  concepts:
+  - PCa-Biopsy-Pathology-Report-Post-Neoadjuvant-Tx
+  - PCa-Biopsy-Pathology-Report-Tumor-Stage
+  - PCa-Biopsy-Pathology-Report-Lymph-Node-Stage
+  - PCa-Biopsy-Pathology-Report-Metastasis-Stage
+
+PCa-Biopsy-Pathology-Report-Tumor-Stage:
+  type: Exclusive-Choice
+  label: prefix
+  control: Selector
+  width: 70
+  value-set: Tumor-Stage
+
+PCa-Biopsy-Pathology-Report-Lymph-Node-Stage:
+  type: Exclusive-Choice
+  label: prefix
+  control: Selector
+  width: 70
+  value-set: Lymph-Node-Stage
+
+PCa-Biopsy-Pathology-Report-Metastasis-Stage:
+  type: Exclusive-Choice
+  label: prefix
+  control: Selector
+  width: 70
+  value-set: Metastasis-Stage
+
+PCa-Biopsy-Pathology-Report-Tumor-Percentage:
+  type: Aggregate
+  display: "inline"
+  spacing: "compact"
+  concepts:
+  - PCa-Biopsy-Pathology-Report-Tumor-Percentage-Min
+  - PCa-Biopsy-Pathology-Report-Tumor-Percentage-Max
+
+PCa-Biopsy-Pathology-Report-Tumor-Percentage-Max:
+  type: Integer
+  unsigned: true
+  max: 100
+
+PCa-Biopsy-Pathology-Report-Tumor-Percentage-Min:
+  type: Integer
+  unsigned: true
+  max: 100
+
+PCa-Biopsy-Pathology-Report-Sample:
+  type: Aggregate
+  display: "inline"
+  concepts:
+  - PCa-Biopsy-Pathology-Report-Sample-Total
+  - PCa-Biopsy-Pathology-Report-Sample-Adenocarcinoma
+  - PCa-Biopsy-Pathology-Report-Sample-ASAP
+  - PCa-Biopsy-Pathology-Report-Sample-HGPIN
+  - PCa-Biopsy-Pathology-Report-Sample-Other
+
+PCa-Biopsy-Pathology-Report-Sample-Total:
+  type: Integer
+  unsigned: true
+  max: 99
+
+PCa-Biopsy-Pathology-Report-Sample-Adenocarcinoma:
+  type: Integer
+  unsigned: true
+  max: 99
+
+PCa-Biopsy-Pathology-Report-Sample-ASAP:
+  type: Integer
+  unsigned: true
+  max: 99
+
+PCa-Biopsy-Pathology-Report-Sample-HGPIN:
+  type: Integer
+  unsigned: true
+  max: 99
+
+PCa-Biopsy-Pathology-Report-Sample-Other:
+  type: Integer
+  unsigned: true
+  max: 99
+
+# #################################################################################################################### #
+# PCa Tx                                                                                                               #
+# #################################################################################################################### #
+HMA-PCa-Tx:
+  type: Block
+  display: "inline"
+  components:
+  - PCa-Radical-Prostatectomy
+  - PCa-Tx-Radiotherapy
+  - HMA-Advanced-PCa-BCR
+
+PCa-Radical-Prostatectomy:
+  type: Event
+  no-enabled: false
+  multiple: true
+  enable-data: PCa-Radical-Prostatectomy-Outcome
+  data:
+  - PCa-Radical-Prostatectomy-Approach
+  - PCa-Radical-Prostatectomy-Lymphadenectomy-Type
+  - PCa-Radical-Prostatectomy-Lymph-Node
+  - PCa-Radical-Prostatectomy-Gleason
+  - PCa-Radical-Prostatectomy-Pathology-Report
+  - PCa-Radical-Prostatectomy-Aborted-Reason
+  - PCa-Radical-Prostatectomy-PSA-Before
+
+PCa-Radical-Prostatectomy-PSA-Before:
+  enable-condition:
+    concept: PCa-Radical-Prostatectomy
+    value: is-date
+  type: Observation-Value
+  path: Laboratory-PSA
+  constraints:
+    Laboratory-PSA:
+      type: before
+      concept: PCa-Radical-Prostatectomy
+
+PCa-Radical-Prostatectomy-Outcome:
+  type: Exclusive-Choice
+  control: "buttons"
+  values:
+  - PCa-Radical-Prostatectomy-Outcome-Completed
+  - PCa-Radical-Prostatectomy-Outcome-Aborted
+
+PCa-Radical-Prostatectomy-Outcome-Completed:
+  type: Value
+PCa-Radical-Prostatectomy-Outcome-Aborted:
+  type: Value
+
+PCa-Radical-Prostatectomy-Aborted-Reason:
+  enable-condition:
+    concept: PCa-Radical-Prostatectomy-Outcome
+    value: PCa-Radical-Prostatectomy-Outcome-Aborted
+  type: Exclusive-Choice
+  other-enabled: true
+  control: "selector"
+
+PCa-Radical-Prostatectomy-Approach:
+  type: Inclusive-Choice
+  label: implicit
+  control: "buttons"
+  values:
+  - PCa-Radical-Prostatectomy-Approach-Robot
+  - PCa-Radical-Prostatectomy-Approach-Laparoscopic
+  - PCa-Radical-Prostatectomy-Approach-Retropubic
+  - PCa-Radical-Prostatectomy-Approach-Perineal
+
+PCa-Radical-Prostatectomy-Approach-Robot:
+  type: Value
+PCa-Radical-Prostatectomy-Approach-Laparoscopic:
+  type: Value
+PCa-Radical-Prostatectomy-Approach-Retropubic:
+  type: Value
+PCa-Radical-Prostatectomy-Approach-Perineal:
+  type: Value
+
+PCa-Radical-Prostatectomy-Lymphadenectomy-Type:
+  type: Exclusive-Choice
+  label: required
+  control: "buttons"
+  width: 160
+  values:
+  - PCa-Radical-Prostatectomy-Lymphadenectomy-Type-Extended
+  - PCa-Radical-Prostatectomy-Lymphadenectomy-Type-Limited
+  - PCa-Radical-Prostatectomy-Lymphadenectomy-Type-Dianostic
+
+PCa-Radical-Prostatectomy-Lymphadenectomy-Type-Extended:
+  type: Value
+PCa-Radical-Prostatectomy-Lymphadenectomy-Type-Limited:
+  type: Value
+PCa-Radical-Prostatectomy-Lymphadenectomy-Type-Dianostic:
+  type: Value
+
+PCa-Radical-Prostatectomy-Lymph-Node:
+  type: Aggregate
+  display: "inline"
+  concepts:
+  - PCa-Radical-Prostatectomy-Lymph-Node-Cancer
+  - PCa-Radical-Prostatectomy-Lymph-Node-Resected
+
+PCa-Radical-Prostatectomy-Lymph-Node-Cancer:
+  type: Integer
+  unsigned: true
+  max: 99
+PCa-Radical-Prostatectomy-Lymph-Node-Resected:
+  type: Integer
+  unsigned: true
+  max: 99
+
+PCa-Radical-Prostatectomy-Gleason:
+  type: Aggregate
+  display: "inline"
+  spacing: "compact"
+  concepts:
+  - PCa-Radical-Prostatectomy-Gleason-1
+  - PCa-Radical-Prostatectomy-Gleason-2
+  - PCa-Radical-Prostatectomy-Gleason-3
+  - PCa-Radical-Prostatectomy-Gleason-Value
+
+PCa-Radical-Prostatectomy-Gleason-1:
+  type: Integer
+  unsigned: true
+  max: 5
+
+PCa-Radical-Prostatectomy-Gleason-2:
+  type: Integer
+  unsigned: true
+  max: 5
+
+PCa-Radical-Prostatectomy-Gleason-3:
+  type: Integer
+  unsigned: true
+  max: 5
+
+PCa-Radical-Prostatectomy-Gleason-Value:
+  type: Integer
+  unsigned: true
+  max: 10
+
+PCa-Radical-Prostatectomy-Pathology-Report-Post-Neoadjuvant-Tx:
+  type: Boolean
+  label: implicit
+  no-enabled: false
+
+PCa-Radical-Prostatectomy-Pathology-Report:
+  type: Aggregate
+  display: "inline"
+  concepts:
+  - PCa-Radical-Prostatectomy-Pathology-Report-Post-Neoadjuvant-Tx
+  - PCa-Radical-Prostatectomy-Pathology-Report-Tumor-Stage
+  - PCa-Radical-Prostatectomy-Pathology-Report-Lymph-Node-Stage
+  - PCa-Radical-Prostatectomy-Pathology-Report-Metastasis-Stage
+  - PCa-Radical-Prostatectomy-Pathology-Report-Resection
+
+PCa-Radical-Prostatectomy-Pathology-Report-Tumor-Stage:
+  type: Exclusive-Choice
+  label: prefix
+  control: Selector
+  width: 70
+  value-set: Tumor-Stage
+
+PCa-Radical-Prostatectomy-Pathology-Report-Lymph-Node-Stage:
+  type: Exclusive-Choice
+  label: prefix
+  control: Selector
+  width: 70
+  value-set: Lymph-Node-Stage
+
+PCa-Radical-Prostatectomy-Pathology-Report-Metastasis-Stage:
+  type: Exclusive-Choice
+  label: prefix
+  control: Selector
+  width: 70
+  value-set: Metastasis-Stage
+
+PCa-Radical-Prostatectomy-Pathology-Report-Resection:
+  type: Exclusive-Choice
+  label: prefix
+  control: Selector
+  width: 70
+  values:
+  - PCa-Radical-Prostatectomy-Pathology-Report-Resection-X
+  - PCa-Radical-Prostatectomy-Pathology-Report-Resection-0
+  - PCa-Radical-Prostatectomy-Pathology-Report-Resection-1
+
+PCa-Radical-Prostatectomy-Pathology-Report-Resection-X:
+  type: value
+PCa-Radical-Prostatectomy-Pathology-Report-Resection-0:
+  type: value
+PCa-Radical-Prostatectomy-Pathology-Report-Resection-1:
+  type: value
+
+# #################################################################################################################### #
+PCa-Tx-Radiotherapy:
+  type: Event
+  multiple: true
+  no-enabled: false
+  end: PCa-Tx-Radiotherapy-End
+  data:
+  - PCa-Tx-Radiotherapy-Visee
+  - PCa-Tx-Radiotherapy-Type
+  - PCa-Tx-Radiotherapy-Champ
+  - PCa-Tx-Radiotherapy-Dose
+  - PCa-Tx-Radiotherapy-PSA-Before
+
+PCa-Tx-Radiotherapy-PSA-Before:
+  enable-condition:
+    concept: PCa-Tx-Radiotherapy
+    value: is-date
+  type: Observation-Value
+  path: Laboratory-PSA
+  constraints:
+    Laboratory-PSA:
+      type: before
+      concept: PCa-Tx-Radiotherapy
+
+PCa-Tx-Radiotherapy-End:
+  type: Event
+  no-enabled: false
+
+PCa-Tx-Radiotherapy-Visee:
+  type: Exclusive-Choice
+  control: "buttons"
+  values:
+  - PCa-Tx-Radiotherapy-Visee-Primary
+  - PCa-Tx-Radiotherapy-Visee-Life-Saving
+  - PCa-Tx-Radiotherapy-Visee-Adjuvant
+
+PCa-Tx-Radiotherapy-Visee-Primary:
+  type: Value
+PCa-Tx-Radiotherapy-Visee-Life-Saving:
+  type: Value
+PCa-Tx-Radiotherapy-Visee-Adjuvant:
+  type: Value
+
+PCa-Tx-Radiotherapy-Type:
+  type: Inclusive-Choice
+  control: "buttons"
+  values:
+  - PCa-Tx-Radiotherapy-Type-External-Beam
+  - PCa-Tx-Radiotherapy-Type-Brachytherapy-High-Dose-Rate
+  - PCa-Tx-Radiotherapy-Type-Brachytherapy-Permanent
+
+PCa-Tx-Radiotherapy-Type-External-Beam:
+  type: value
+PCa-Tx-Radiotherapy-Type-Brachytherapy-High-Dose-Rate:
+  type: value
+PCa-Tx-Radiotherapy-Type-Brachytherapy-Permanent:
+  type: value
+
+PCa-Tx-Radiotherapy-Champ:
+  type: Inclusive-Choice
+  control: "buttons"
+  values:
+  - PCa-Tx-Radiotherapy-Champ-Prostate-Only
+  - PCa-Tx-Radiotherapy-Champ-Whole-Pelvic
+
+PCa-Tx-Radiotherapy-Champ-Prostate-Only:
+  type: value
+PCa-Tx-Radiotherapy-Champ-Whole-Pelvic:
+  type: value
+
+PCa-Tx-Radiotherapy-Dose:
+  type: Aggregate
+  concepts:
+  - PCa-Tx-Radiotherapy-Dose-Value
+  - PCa-Tx-Radiotherapy-Dose-Fraction
+
+PCa-Tx-Radiotherapy-Dose-Value:
+  type: Float
+  label: false
+  unsigned: true
+  max: 99
+  format: "0.0a"
+  unit: Radiotherapy-Dose-Unit
+
+PCa-Tx-Radiotherapy-Dose-Fraction:
+  type: Integer
+  unsigned: true
+  max: 99
+  format: "00"
+
+# #################################################################################################################### #
+# Advanced PCa                                                                                                         #
+# #################################################################################################################### #
+HMA-Advanced-PCa:
+  type: Block
+  display: "inline"
+  components:
+  - HMA-Advanced-PCa-BCR
+  - HMA-Advanced-PCa-ADT
+  - HMA-Advanced-PCa-Chimio
+  - HMA-Advanced-PCa-ADT-2nd
+  - PCa-Palliative-Radiotherapy
+
+HMA-Advanced-PCa-BCR:
+  type: Event
+  no-enabled: false
+  data: HMA-Advanced-PCa-BCR-PSA-Before
+
+HMA-Advanced-PCa-BCR-PSA-Before:
+  enable-condition:
+    concept: HMA-Advanced-PCa-BCR
+    value: is-date
+  type: Observation-Value
+  path: Laboratory-PSA
+  constraints:
+    Laboratory-PSA:
+      type: before
+      concept: HMA-Advanced-PCa-BCR
+
+HMA-Advanced-PCa-ADT:
+  type: Aggregate
+  display: "subgroup"
+  concepts:
+  - HMA-Advanced-PCa-ADT-Status
+  - HMA-Advanced-PCa-ADT-Recue-Event
+HMA-Advanced-PCa-ADT-Status:
+  type: Exclusive-Choice
+  control: "buttons"
+  values:
+  - HMA-Advanced-PCa-ADT-Status-Hormone-Naive
+  - HMA-Advanced-PCa-ADT-Status-Castration-Sensitive
+  - HMA-Advanced-PCa-ADT-Status-Castration-Resistant
+
+HMA-Advanced-PCa-ADT-Status-Hormone-Naive:
+  type: value
+HMA-Advanced-PCa-ADT-Status-Castration-Sensitive:
+  type: value
+HMA-Advanced-PCa-ADT-Status-Castration-Resistant:
+  type: value
+
+HMA-Advanced-PCa-ADT-Recue-Event:
+  type: Event
+  multiple: true
+  enable-data: HMA-Advanced-PCa-ADT-Recue-Event-Type
+  end: HMA-Advanced-PCa-ADT-Recue-Event-End
+  data:
+  - HMA-Advanced-PCa-ADT-Recue-Event-PSA-Before
+  - HMA-Advanced-PCa-ADT-Recue-Event-PSA-Min
+
+HMA-Advanced-PCa-ADT-Recue-Event-Type:
+  type: Exclusive-Choice
+  control: "selector"
+  other-enabled: true
+
+HMA-Advanced-PCa-ADT-Recue-Event-End:
+  type: Event
+  no-enabled: false
+
+HMA-Advanced-PCa-ADT-Recue-Event-PSA-Before:
+  enable-condition:
+    concept: HMA-Advanced-PCa-ADT-Recue-Event
+    value: is-date
+  type: Observation-Value
+  path: Laboratory-PSA
+  constraints:
+    Laboratory-PSA:
+      type: before
+      concept: HMA-Advanced-PCa-ADT-Recue-Event
+
+HMA-Advanced-PCa-ADT-Recue-Event-PSA-Min:
+  enable-condition:
+    concept: HMA-Advanced-PCa-ADT-Recue-Event
+    value: is-date
+  type: Observation-Value
+  path: Laboratory-PSA
+  constraints:
+    Laboratory-PSA:
+      type: minimum
+      value: Laboratory-PSA-Value
+      between: [HMA-Advanced-PCa-ADT-Recue-Event, HMA-Advanced-PCa-ADT-Recue-Event-End]
+
+HMA-Advanced-PCa-Chimio:
+  type: Aggregate
+  display: "subgroup"
+  concepts:
+  - HMA-Advanced-PCa-Chimio-Status
+  - HMA-Advanced-PCa-Chimio-Recue-Event
+HMA-Advanced-PCa-Chimio-Status:
+  type: Exclusive-Choice
+  control: "buttons"
+  values:
+  - HMA-Advanced-PCa-Chimio-Status-Naive
+  - HMA-Advanced-PCa-Chimio-Status-Responding
+  - HMA-Advanced-PCa-Chimio-Status-Post-Chemo-Recurrence
+
+HMA-Advanced-PCa-Chimio-Status-Naive:
+  type: value
+HMA-Advanced-PCa-Chimio-Status-Responding:
+  type: value
+HMA-Advanced-PCa-Chimio-Status-Post-Chemo-Recurrence:
+  type: value
+
+HMA-Advanced-PCa-Chimio-Recue-Event:
+  type: Event
+  multiple: true
+  enable-data: HMA-Advanced-PCa-Chimio-Recue-Event-Type
+  end: HMA-Advanced-PCa-Chimio-Recue-Event-End
+  data:
+  - HMA-Advanced-PCa-Chimio-Recue-Event-PSA-Before
+  - HMA-Advanced-PCa-Chimio-Recue-Event-PSA-Min
+
+HMA-Advanced-PCa-Chimio-Recue-Event-Type:
+  type: Exclusive-Choice
+  control: "selector"
+  other-enabled: true
+
+HMA-Advanced-PCa-Chimio-Recue-Event-End:
+  type: Event
+  no-enabled: false
+
+HMA-Advanced-PCa-Chimio-Recue-Event-PSA-Before:
+  enable-condition:
+    concept: HMA-Advanced-PCa-Chimio-Recue-Event
+    value: is-date
+  type: Observation-Value
+  path: Laboratory-PSA
+  constraints:
+    Laboratory-PSA:
+      type: before
+      concept: HMA-Advanced-PCa-Chimio-Recue-Event
+
+HMA-Advanced-PCa-Chimio-Recue-Event-PSA-Min:
+  enable-condition:
+    concept: HMA-Advanced-PCa-Chimio-Recue-Event
+    value: is-date
+  type: Observation-Value
+  path: Laboratory-PSA
+  constraints:
+    Laboratory-PSA:
+      type: minimum
+      value: Laboratory-PSA-Value
+      between: [HMA-Advanced-PCa-Chimio-Recue-Event, HMA-Advanced-PCa-Chimio-Recue-Event-End]
+
+HMA-Advanced-PCa-ADT-2nd:
+  type: Aggregate
+  display: "subgroup"
+  concepts: HMA-Advanced-PCa-ADT-2nd-Recue-Event
+
+HMA-Advanced-PCa-ADT-2nd-Recue-Event:
+  type: Event
+  multiple: true
+  enable-data: HMA-Advanced-PCa-ADT-2nd-Recue-Event-Type
+  end: HMA-Advanced-PCa-ADT-2nd-Recue-Event-End
+  data:
+  - HMA-Advanced-PCa-ADT-2nd-Recue-Event-PSA-Before
+  - HMA-Advanced-PCa-ADT-2nd-Recue-Event-PSA-Min
+
+HMA-Advanced-PCa-ADT-2nd-Recue-Event-Type:
+  type: Exclusive-Choice
+  control: "selector"
+  other-enabled: true
+
+HMA-Advanced-PCa-ADT-2nd-Recue-Event-End:
+  type: Event
+  no-enabled: false
+
+HMA-Advanced-PCa-ADT-2nd-Recue-Event-PSA-Before:
+  enable-condition:
+    concept: HMA-Advanced-PCa-ADT-2nd-Recue-Event
+    value: is-date
+  type: Observation-Value
+  path: Laboratory-PSA
+  constraints:
+    Laboratory-PSA:
+      type: before
+      concept: HMA-Advanced-PCa-ADT-2nd-Recue-Event
+
+HMA-Advanced-PCa-ADT-2nd-Recue-Event-PSA-Min:
+  enable-condition:
+    concept: HMA-Advanced-PCa-ADT-2nd-Recue-Event
+    value: is-date
+  type: Observation-Value
+  path: Laboratory-PSA
+  constraints:
+    Laboratory-PSA:
+      type: minimum
+      value: Laboratory-PSA-Value
+      between: [HMA-Advanced-PCa-ADT-2nd-Recue-Event, HMA-Advanced-PCa-ADT-2nd-Recue-Event-End]
+
+PCa-Palliative-Radiotherapy:
+  type: Block
+  components:
+    - PCa-Palliative-Radiotherapy-Event
+
+PCa-Palliative-Radiotherapy-Event:
+  type: Event
+  multiple: true
+  no-enabled: false
+  enable-data: PCa-Palliative-Radiotherapy-Event-Site
+  end: PCa-Palliative-Radiotherapy-Event-End
+  data:
+  - PCa-Palliative-Radiotherapy-Event-Type
+  - PCa-Palliative-Radiotherapy-Event-Dose
+
+PCa-Palliative-Radiotherapy-Event-End:
+  type: Event
+  no-enabled: false
+
+PCa-Palliative-Radiotherapy-Event-Type:
+  type: Inclusive-Choice
+  control: "buttons"
+  values:
+  - PCa-Palliative-Radiotherapy-Event-Type-External-Beam
+  - PCa-Palliative-Radiotherapy-Event-Type-Brachytherapy-High-Dose-Rate
+  - PCa-Palliative-Radiotherapy-Event-Type-Brachytherapy-Permanent
+
+PCa-Palliative-Radiotherapy-Event-Type-External-Beam:
+  type: value
+
+PCa-Palliative-Radiotherapy-Event-Type-Brachytherapy-High-Dose-Rate:
+  type: value
+PCa-Palliative-Radiotherapy-Event-Type-Brachytherapy-Permanent:
+  type: value
+
+PCa-Palliative-Radiotherapy-Event-Site:
+  type: Exclusive-Choice
+  other-enabled: true
+  control: "selector"
+  value-set: Radiotherapy-Site
+
+PCa-Palliative-Radiotherapy-Event-Dose:
+  type: Aggregate
+  concepts:
+  - PCa-Palliative-Radiotherapy-Event-Dose-Value
+  - PCa-Palliative-Radiotherapy-Event-Dose-Fraction
+
+PCa-Palliative-Radiotherapy-Event-Dose-Value:
+  type: Float
+  label: false
+  unsigned: true
+  max: 99
+  format: "0.0a"
+  unit: Radiotherapy-Dose-Unit
+
+PCa-Palliative-Radiotherapy-Event-Dose-Fraction:
+  type: Integer
+  unsigned: true
+  max: 99
+  format: "00"
+
+# #################################################################################################################### #
+# Symptoms                                                                                                             #
+# #################################################################################################################### #
+HMA-PCa-Symptoms:
+  type: Today-Event
+  collapse: true
+  data:
+  - HMA-PCa-Symptoms-Pain
+  - HMA-Symptoms-Notes
+
+HMA-PCa-Symptoms-Pain:
+  type: Block
+  components:
+  - HMA-Symptoms-Pain-Intensity
+  - HMA-Symptoms-PCa-LUTS
+
+HMA-Symptoms-Pain-Intensity:
+  type: Exclusive-Choice
+  control: "selector"
+  label: true
+  values:
+  - HMA-Symptoms-Pain-Intensity-None
+  - HMA-Symptoms-Pain-Intensity-Mild
+  - HMA-Symptoms-Pain-Intensity-Moderate
+  - HMA-Symptoms-Pain-Intensity-Severe
+
+HMA-Symptoms-PCa-LUTS:
+  type: Exclusive-Choice
+  control: "selector"
+  label: true
+  values:
+  - HMA-Symptoms-PCa-LUTS-None
+  - HMA-Symptoms-PCa-LUTS-Mild
+  - HMA-Symptoms-PCa-LUTS-Moderate
+  - HMA-Symptoms-PCa-LUTS-Severe
+
+HMA-Symptoms-Pain-Intensity-None:
+  type: value
+HMA-Symptoms-Pain-Intensity-Mild:
+  type: value
+HMA-Symptoms-Pain-Intensity-Moderate:
+  type: value
+HMA-Symptoms-Pain-Intensity-Severe:
+  type: value
+
+HMA-Symptoms-PCa-LUTS-None:
+  type: value
+HMA-Symptoms-PCa-LUTS-Mild:
+  type: value
+HMA-Symptoms-PCa-LUTS-Moderate:
+  type: value
+HMA-Symptoms-PCa-LUTS-Severe:
+  type: value
+
+HMA-Symptoms-Notes:
+  type: text
+  label: false
+  control: "textarea"
+  attributes:
+    rows: 10
