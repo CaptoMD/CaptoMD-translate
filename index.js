@@ -6,6 +6,7 @@ const path = require('path');
 const chalk = require('chalk');
 
 const readConcepts = require('./lib/concept/read-concepts');
+const readRequests = require('./lib/request/read-requests');
 const { openSpreadsheet } = require('./lib/speadsheet/spreadsheet');
 const pushConcepts = require('./lib/speadsheet/push-concepts');
 const extractTranslations = require('./lib/translations/extract-translations');
@@ -13,18 +14,19 @@ const extractConceptValues = require('./lib/translations/extract-concept-values'
 const writeTranslations = require('./lib/translations/write-translations');
 const writeValues = require('./lib/translations/write-values');
 
-module.exports = async function loadTranslations({
+async function loadTranslations({
   translations: translationSpreadsheetId,
   values: valueSpreadsheetId,
   concepts: conceptsRootPath,
-  target: targetPath
+  target: targetPath,
+  verbose
 }) {
   const cred = require(path.resolve('./.spreadsheet-creds.json'));
 
   const [concepts, translationDocument, valueDocument] = await Promise.all([
-    readConcepts(conceptsRootPath),
-    openSpreadsheet(translationSpreadsheetId, cred),
-    openSpreadsheet(valueSpreadsheetId, cred)
+    readConcepts(conceptsRootPath, { verbose }),
+    openSpreadsheet(translationSpreadsheetId, cred, { verbose }),
+    openSpreadsheet(valueSpreadsheetId, cred, { verbose })
   ]);
 
   const updatedConcepts = await pushConcepts(concepts, translationDocument);
@@ -40,4 +42,6 @@ module.exports = async function loadTranslations({
 
   const valueRootPath = path.resolve(conceptsRootPath, 'values');
   await Promise.all([writeTranslations(targetPath, translations), writeValues(valueRootPath, values)]);
-};
+}
+
+module.exports = { loadTranslations, readConcepts, readRequests };
