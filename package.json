@@ -9,14 +9,15 @@
     "node": ">=9.0"
   },
   "bin": {
-    "md-translate" : "./bin/md-translate.js"
+    "md-translate": "./bin/md-translate.js"
   },
   "dependencies": {
     "chalk": "2.4.1",
     "google-spreadsheet": "2.0.5",
     "js-yaml": "^3.12.0",
     "lodash": "4.17.10",
-    "minimist": "1.2.0"
+    "minimist": "1.2.0",
+    "snyk": "^1.83.0"
   },
   "pre-commit": [
     "eslint"
@@ -30,10 +31,13 @@
     "prettier": "1.13.6"
   },
   "scripts": {
-    "eslint": "eslint --cache ."
+    "eslint": "eslint --cache .",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "prettier": {
     "singleQuote": true,
     "printWidth": 120
-  }
+  },
+  "snyk": true
 }
