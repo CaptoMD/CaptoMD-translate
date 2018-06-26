@@ -13,8 +13,8 @@
   },
   "dependencies": {
     "chalk": "2.4.1",
-    "google-spreadsheet": "2.0.4",
-    "js-yaml": "^3.11.0",
+    "google-spreadsheet": "2.0.5",
+    "js-yaml": "^3.12.0",
     "lodash": "4.17.10",
     "minimist": "1.2.0"
   },
@@ -22,12 +22,12 @@
     "eslint"
   ],
   "devDependencies": {
-    "eslint": "^4.19.1",
-    "eslint-plugin-import": "^2.12.0",
+    "eslint": "^5.0.1",
+    "eslint-plugin-import": "^2.13.0",
     "eslint-plugin-node": "^6.0.1",
-    "eslint-plugin-prettier": "^2.6.0",
+    "eslint-plugin-prettier": "^2.6.1",
     "pre-commit": "^1.2.2",
-    "prettier": "1.13.4"
+    "prettier": "1.13.6"
   },
   "scripts": {
     "eslint": "eslint --cache ."
