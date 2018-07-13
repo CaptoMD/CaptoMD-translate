@@ -41,7 +41,11 @@ async function runTranslations({
   verbose
 }) {
   if (!translationSpreadsheetId) {
-    return await extractConcepts(conceptsRootPath, { verbose });
+    const concepts = await extractConcepts(conceptsRootPath, { verbose });
+    if (verbose) {
+      console.dir(concepts);
+    }
+    return concepts;
   } else {
     const cred = require(path.resolve('./.spreadsheet-creds.json'));
 
