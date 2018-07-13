@@ -1,0 +1,5 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="list worksheets" type="NodeJSConfigurationType" factoryName="Node.js" application-parameters="--sheets 1NAiG1XmbmGR7YWJ4A9h6s3i5TK24pAcHvL9O3mxB9Io" path-to-js-file="index.js" working-dir="$PROJECT_DIR$">
+    <method />
+  </configuration>
+</component>

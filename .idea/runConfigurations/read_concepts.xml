@@ -1,0 +1,5 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="read concepts" type="NodeJSConfigurationType" factoryName="Node.js" application-parameters="--concepts $PROJECT_DIR$/../CaptoMD-assets-webpack/src/concepts" path-to-js-file="bin/md-translate.js" working-dir="$PROJECT_DIR$">
+    <method />
+  </configuration>
+</component>
