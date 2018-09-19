@@ -20,15 +20,3 @@ extends:
 
 rules:
   prettier/prettier: error
-#  node/no-unpublished-require: off
-#  spaced-comment: off
-#  padded-blocks: off
-#  max-len: off
-#  no-console: off
-#  arrow-body-style: [warn, as-needed]
-#  block-spacing: [error, never]
-#  object-curly-spacing: [error, never]
-#  brace-style: [error, allman, {allowSingleLine: true}]
-#  no-param-reassign: [error, {props: false}]
-#  object-curly-newline: [error, {consistent: true}]
-#  function-paren-newline: [error, consistent]
