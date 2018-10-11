@@ -1,10 +1,11 @@
 /*
- * Copyright (c) 2016 CaptoMD
+ * Copyright (c) 2018 CaptoMD
  */
 
 const path = require('path');
 const chalk = require('chalk');
 const _ = require('lodash');
+const branch = require('git-branch');
 
 const readConcepts = require('./lib/source/read-concepts');
 const readRequests = require('./lib/source/read-requests');
@@ -49,20 +50,23 @@ async function runTranslations({
   } else {
     const cred = require(path.resolve('./.spreadsheet-creds.json'));
 
-    const [concepts, translationDocument, valueDocument] = await Promise.all([
+    const [concepts, translationDocument, valueDocument, branchName] = await Promise.all([
       extractConcepts(conceptsRootPath, { verbose }),
       openSpreadsheet(translationSpreadsheetId, cred, { verbose }),
-      openSpreadsheet(valueSpreadsheetId, cred, { verbose })
+      openSpreadsheet(valueSpreadsheetId, cred, { verbose }),
+      branch('.')
     ]);
 
-    const updatedConcepts = await pushConcepts(concepts, translationDocument);
+    console.log(chalk`Processing translations for branch {cyan ${branchName}}`);
+
+    const updatedConcepts = await pushConcepts(concepts, translationDocument, branchName);
 
     if (updatedConcepts.length > 0) {
       console.warn(chalk`{yellow Updated spreadsheet. Review changes}`);
     }
 
     const [translations, values] = await Promise.all([
-      extractTranslations(concepts, translationDocument),
+      extractTranslations(concepts, translationDocument, branchName),
       extractConceptValues(concepts, valueDocument)
     ]);
 
