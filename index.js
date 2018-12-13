@@ -6,32 +6,43 @@ const path = require('path');
 const chalk = require('chalk');
 const _ = require('lodash');
 const branch = require('git-branch');
+const log = require('loglevel');
 
 const readConcepts = require('./lib/source/read-concepts');
 const readRequests = require('./lib/source/read-requests');
-const processConcept = require('./lib/concept/process-concepts');
+const processConcepts = require('./lib/concept/process-concepts');
 const { openSpreadsheet } = require('./lib/speadsheet/spreadsheet');
 const pushConcepts = require('./lib/speadsheet/push-concepts');
-const extractTranslations = require('./lib/translations/extract-translations');
-const extractConceptValues = require('./lib/translations/extract-concept-values');
-const writeTranslations = require('./lib/translations/write-translations');
-const writeValues = require('./lib/translations/write-values');
+const extractTranslations = require('./lib/extract/extract-translations');
+const extractConceptValues = require('./lib/extract/extract-concept-values');
+const extractConceptLabels = require('./lib/extract/extract-concept-labels');
+const writeTranslations = require('./lib/source/write-translations');
+const writeValues = require('./lib/source/write-values');
+const writeConfig = require('./lib/source/write-config');
+
+const LANG = ['fr', 'en'];
+
+function getLevel(verbose) {
+  return verbose ? log.levels.INFO : log.levels.WARN;
+}
 
 async function extractConcepts(conceptsRootPath, { verbose = true }) {
+  log.getLogger('process-concepts').setLevel(getLevel(verbose));
   const conceptData = await readConcepts(conceptsRootPath, { verbose });
-
-  const concepts = _.transform(conceptData, (result, c, id) => {
-    const extractedConcepts = processConcept(c, id, conceptData, { verbose });
-    _.assignWith(result, extractedConcepts, (objValue, srcValue, key) => {
-      if (objValue && srcValue) {
-        throw new Error(`duplicated concept ${key}`);
-      }
-    });
-  });
+  const concepts = processConcepts(conceptData);
   if (verbose) {
     console.log(chalk`Extracted: {bold ${Object.keys(concepts).length}} concepts`);
   }
   return concepts;
+}
+
+async function extractAllTranslations(translationDocument, concepts, languages = LANG) {
+  const translations = await extractTranslations(translationDocument, languages);
+  const conceptLabels = await extractConceptLabels(translationDocument, concepts, languages);
+  LANG.forEach(lang => {
+    _.set(translations, [lang, 'concept'], conceptLabels[lang]);
+  });
+  return { translations, config: conceptLabels.config };
 }
 
 async function runTranslations({
@@ -39,8 +50,16 @@ async function runTranslations({
   values: valueSpreadsheetId,
   concepts: conceptsRootPath,
   target: targetPath,
-  verbose
+  verbose = true,
+  dryRun
 }) {
+  log.setLevel(getLevel(verbose));
+  log.getLogger('read-file').setLevel(getLevel(verbose));
+  log.getLogger('write-file').setLevel(getLevel(verbose));
+  log.getLogger('spreadsheet').setLevel(getLevel(verbose));
+  log.getLogger('push-concept').setLevel(getLevel(verbose));
+  log.getLogger('extract-values').setLevel(getLevel(verbose));
+  log.getLogger('extract-translations').setLevel(getLevel(verbose));
   if (!translationSpreadsheetId) {
     const concepts = await extractConcepts(conceptsRootPath, { verbose });
     if (verbose) {
@@ -52,26 +71,29 @@ async function runTranslations({
 
     const [concepts, translationDocument, valueDocument, branchName] = await Promise.all([
       extractConcepts(conceptsRootPath, { verbose }),
-      openSpreadsheet(translationSpreadsheetId, cred, { verbose }),
-      openSpreadsheet(valueSpreadsheetId, cred, { verbose }),
+      openSpreadsheet(translationSpreadsheetId, cred),
+      openSpreadsheet(valueSpreadsheetId, cred),
       branch('.')
     ]);
 
-    console.log(chalk`Processing translations for branch {cyan ${branchName}}`);
-
-    const updatedConcepts = await pushConcepts(concepts, translationDocument, branchName);
-
-    if (updatedConcepts.length > 0) {
-      console.warn(chalk`{yellow Updated spreadsheet. Review changes}`);
+    if (!dryRun) {
+      log.info(chalk`Updating Spreadsheets for branch {cyan.bold ${branchName}}`);
+      await pushConcepts(concepts, translationDocument);
+    } else {
+      log.info(chalk`{yellow dry-run:} Spreadsheets are not updated`);
     }
 
-    const [translations, values] = await Promise.all([
-      extractTranslations(concepts, translationDocument, branchName),
-      extractConceptValues(concepts, valueDocument)
+    const [{ translations, config }, values] = await Promise.all([
+      extractAllTranslations(translationDocument, concepts, LANG),
+      extractConceptValues(valueDocument, concepts, LANG)
     ]);
 
     const valueRootPath = path.resolve(conceptsRootPath, 'values');
-    await Promise.all([writeTranslations(targetPath, translations), writeValues(valueRootPath, values)]);
+    await Promise.all([
+      writeTranslations(targetPath, translations),
+      writeValues(valueRootPath, values),
+      writeConfig(targetPath, config)
+    ]);
   }
 }
 
