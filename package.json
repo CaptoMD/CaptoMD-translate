@@ -16,18 +16,18 @@
     "git-branch": "2.0.1",
     "google-spreadsheet": "2.0.7",
     "js-yaml": "3.13.1",
-    "lodash": "4.17.14",
+    "lodash": "4.17.15",
     "loglevel": "1.6.3",
     "minimist": "1.2.0"
   },
   "devDependencies": {
-    "eslint": "^6.0.1",
-    "eslint-plugin-import": "^2.18.0",
+    "eslint": "^6.2.2",
+    "eslint-plugin-import": "^2.18.2",
     "eslint-plugin-node": "^9.1.0",
     "eslint-plugin-prettier": "^3.1.0",
     "pre-commit": "^1.2.2",
     "prettier": "^1.18.2",
-    "snyk": "^1.193.2"
+    "snyk": "^1.221.0"
   },
   "pre-commit": [
     "eslint"
