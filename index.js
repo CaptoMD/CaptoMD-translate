@@ -5,7 +5,6 @@
 const path = require('path');
 const chalk = require('chalk');
 const _ = require('lodash');
-const branch = require('git-branch');
 const log = require('loglevel');
 
 const readConcepts = require('./lib/source/read-concepts');
@@ -26,6 +25,14 @@ function getLevel(verbose) {
   return verbose ? log.levels.INFO : log.levels.WARN;
 }
 
+function defaultCredentials() {
+  return require(path.resolve('./.spreadsheet-creds.json'));
+}
+
+async function open(spreadsheetId, credentials = defaultCredentials()) {
+  return openSpreadsheet(spreadsheetId, credentials);
+}
+
 async function extractConcepts(conceptsRootPath, { verbose = true }) {
   log.getLogger('process-concepts').setLevel(getLevel(verbose));
   const conceptData = await readConcepts(conceptsRootPath, { verbose });
@@ -36,13 +43,23 @@ async function extractConcepts(conceptsRootPath, { verbose = true }) {
   return concepts;
 }
 
-async function extractAllTranslations(translationDocument, concepts, languages = LANG) {
-  const translations = await extractTranslations(translationDocument, languages);
-  const conceptLabels = await extractConceptLabels(translationDocument, concepts, languages);
-  LANG.forEach(lang => {
+async function processTranslationSpreadsheet(translationSpreadsheetId, concepts, targetPath, dryRun) {
+  const doc = await open(translationSpreadsheetId);
+  const { Concepts: conceptsSheet, ['Concepts-Values']: conceptValuesSheet, ...otherSheets } = doc.sheetsByTitle;
+  await pushConcepts(concepts, conceptsSheet, conceptValuesSheet, dryRun);
+  const translations = await extractTranslations(otherSheets, LANG);
+  const conceptLabels = await extractConceptLabels(conceptsSheet, conceptValuesSheet, concepts, LANG);
+  LANG.forEach((lang) => {
     _.set(translations, [lang, 'concept'], conceptLabels[lang]);
   });
-  return { translations, config: conceptLabels.config };
+  await writeTranslations(targetPath, translations);
+  await writeConfig(targetPath, conceptLabels.config);
+}
+
+async function processValueSpreadsheet(valueSpreadsheetId, concepts, targetPath, verbose) {
+  const doc = await open(valueSpreadsheetId);
+  const conceptsValues = await extractConceptValues(doc, concepts, LANG, verbose);
+  await writeValues(targetPath, conceptsValues);
 }
 
 async function runTranslations({
@@ -51,7 +68,7 @@ async function runTranslations({
   concepts: conceptsRootPath,
   target: targetPath,
   verbose = true,
-  dryRun
+  dryRun,
 }) {
   log.setLevel(getLevel(verbose));
   log.getLogger('read-file').setLevel(getLevel(verbose));
@@ -60,40 +77,17 @@ async function runTranslations({
   log.getLogger('push-concept').setLevel(getLevel(verbose));
   log.getLogger('extract-values').setLevel(getLevel(verbose));
   log.getLogger('extract-translations').setLevel(getLevel(verbose));
-  if (!translationSpreadsheetId) {
-    const concepts = await extractConcepts(conceptsRootPath, { verbose });
-    if (verbose) {
-      console.dir(concepts);
-    }
-    return concepts;
+
+  const concepts = await extractConcepts(conceptsRootPath, { verbose });
+
+  if (translationSpreadsheetId) {
+    await processTranslationSpreadsheet(translationSpreadsheetId, concepts, targetPath, dryRun);
+  } else if (valueSpreadsheetId) {
+    await processValueSpreadsheet(valueSpreadsheetId, concepts, path.resolve(conceptsRootPath, 'values'), verbose);
   } else {
-    const cred = require(path.resolve('./.spreadsheet-creds.json'));
-
-    const [concepts, translationDocument, valueDocument, branchName] = await Promise.all([
-      extractConcepts(conceptsRootPath, { verbose }),
-      openSpreadsheet(translationSpreadsheetId, cred),
-      openSpreadsheet(valueSpreadsheetId, cred),
-      branch('.')
-    ]);
-
-    if (!dryRun) {
-      log.info(chalk`Updating Spreadsheets for branch {cyan.bold ${branchName}}`);
-      await pushConcepts(concepts, translationDocument);
-    } else {
-      log.info(chalk`{yellow dry-run:} Spreadsheets are not updated`);
-    }
-
-    const [{ translations, config }, values] = await Promise.all([
-      extractAllTranslations(translationDocument, concepts, LANG),
-      extractConceptValues(valueDocument, concepts, LANG)
-    ]);
-
-    const valueRootPath = path.resolve(conceptsRootPath, 'values');
-    await Promise.all([
-      writeTranslations(targetPath, translations),
-      writeValues(valueRootPath, values),
-      writeConfig(targetPath, config)
-    ]);
+    _.map(concepts, (value, id) => {
+      console.log(id, value);
+    });
   }
 }
 
