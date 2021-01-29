@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
-const { runTranslations } = require('../index');
+const { run } = require('../index');
 
 process.on('unhandledRejection', (err) => {
   throw err;
 });
 
-runTranslations(require('minimist')(process.argv.slice(2)));
+run(require('minimist')(process.argv.slice(2)));

@@ -6,6 +6,7 @@ const path = require('path');
 const chalk = require('chalk');
 const _ = require('lodash');
 const log = require('loglevel');
+const fs = require('fs');
 
 const readConcepts = require('./lib/source/read-concepts');
 const readRequests = require('./lib/source/read-requests');
@@ -15,6 +16,7 @@ const pushConcepts = require('./lib/speadsheet/push-concepts');
 const extractTranslations = require('./lib/extract/extract-translations');
 const extractConceptValues = require('./lib/extract/extract-concept-values');
 const extractConceptLabels = require('./lib/extract/extract-concept-labels');
+const extractMapping = require('./lib/mapping/extract-mapping');
 const writeTranslations = require('./lib/source/write-translations');
 const writeValues = require('./lib/source/write-values');
 const writeConfig = require('./lib/source/write-config');
@@ -91,4 +93,22 @@ async function runTranslations({
   }
 }
 
-module.exports = { runTranslations, extractConcepts, readConcepts, readRequests };
+async function processMappingSpreadsheet(valueSpreadsheetId, targetFile, verbose) {
+  log.setLevel(getLevel(verbose));
+  log.getLogger('extract-mapping').setLevel(getLevel(verbose));
+  const doc = await open(valueSpreadsheetId);
+  const mapping = await extractMapping(doc.sheetsByTitle);
+  const resolvedPath = path.resolve(__dirname, targetFile);
+  log.info(chalk`Writing to {cyan ${resolvedPath}}`);
+  fs.writeFileSync(resolvedPath, JSON.stringify(mapping), 'utf8');
+}
+
+async function run(params) {
+  if (params.mapping) {
+    await processMappingSpreadsheet(params.mapping, params.target || 'temp.json', params.verbose || true);
+  } else {
+    await runTranslations(params);
+  }
+}
+
+module.exports = { run, extractConcepts, readConcepts, readRequests };
