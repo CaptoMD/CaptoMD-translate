@@ -15,7 +15,7 @@
     "chalk": "4.1.0",
     "git-branch": "2.0.1",
     "google-spreadsheet": "3.0.13",
-    "js-yaml": "3.14.0",
+    "js-yaml": "3.14.2",
     "lodash": "4.17.20",
     "loglevel": "1.7.0",
     "minimist": "1.2.5",
